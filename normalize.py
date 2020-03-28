@@ -1,27 +1,48 @@
-import pandas as pd
 import argparse
-from utils.similarity import get_tfidf_matrix,awesome_cossim_top, get_matches_df
-from utils.log import logger
-from utils.utils import text_2_id, get_combinations, flatten
 import os
+import csv
+
+import pandas as pd
+
+from utils.log import logger
+from utils.similarity import get_top_similarity_indices
+from utils.utils import text_2_id, get_combinations
+
 
 class Normalizer:
-    def __init__(self,ref_df,wiki_df, output_folder):
+    def __init__(self, ref_df, wiki_df, output_folder):
         self.ref_df = ref_df
         self.wiki_df = wiki_df
-        self.ref_names = {} # key is ref name, value is set of wiki concepts
-        self.ref_synonyms = {} # key is synonym, value is set of ref names
-        self.names = {} # key is wiki name, value is wiki concept
+        self.ref_names = {}  # key is ref main name, value is set of wiki concepts
+        self.ref_synonyms = {}  # key is synonym, value is set of ref names
+        self.wiki_concepts = {}  # key is wiki concept, value is main label
+        self.wiki_concepts_inv = {}  # key is main label, value is set of wiki concepts
+        self.wiki_synonyms = {}  # key is synonym, value is wiki concept
         self.matches = {}  # key is string, value is set of matching strings
-        self.matches_df = None # for debugging, storing it in folder
+        self.matches_df = None  # for debugging, storing it in folder
         self.output_folder = output_folder
+
 
     @staticmethod
     def get_subnames(name):
-        return [" ".join(list(combination)) for combination in get_combinations(name.split(" "), 2)]
+        '''
+        :param name: a sentence
+        :return: combination of 2 words minimum, must be anchored at beginning or end, at least one word of the combination has to be bigger than 3 letters
+        '''
+        words = name.split(" ")
+        subnames = set()
+        for combination in get_combinations(words, 2):
+            big_enough = False
+            for word in combination:
+                if len(word)>3:
+                    big_enough = True
+                    break
+            if big_enough and (combination[0]==words[0] or combination[len(combination)-1]==words[len(words)-1]):
+                subnames.add(" ".join(list(combination)))
+        return list(subnames)
 
     @staticmethod
-    def add_name(name,d,identifier):
+    def add_name(name, d, identifier):
         if name not in d.keys():
             d[name] = set()
         if identifier is not None:
@@ -34,137 +55,71 @@ class Normalizer:
             if identifier is not None:
                 d[combination].add(identifier)
 
-    def set_ref_names(self,negative_list=[]):
-        logger.info("Setting reference names, negative list={}".format(len(negative_list)))
+    def set_ref_names(self):
+        logger.info("Setting reference names...")
         for k in set(self.ref_df["Name"].unique()):
             k = text_2_id(k)
-            if k in negative_list:
-                continue
             self.ref_names[k] = set()
-            Normalizer.add_name(k,self.ref_synonyms,k)
-        logger.info("Number of athletes={}, Number of names={}".format(len(self.ref_df),len(self.ref_synonyms)))
+            Normalizer.add_name(k, self.ref_synonyms, k)
+        logger.info("Number of athletes={}, Number of names={}".format(len(self.ref_names), len(self.ref_synonyms)))
 
-    def set_wiki_names(self,negative_list=[]):
-        logger.info("Setting wiki names, negative list={}".format(len(negative_list)))
-        for i,row in self.wiki_df.iterrows():
-            if row["concept"] in negative_list:
-                continue
+    def set_wiki_names(self):
+        logger.info("Setting wiki names...")
+        for i, row in self.wiki_df.iterrows():
             name = row["label"]
             name = text_2_id(name)
-            Normalizer.add_name(name,self.names,row["concept"])
+            self.wiki_concepts[row["concept"]] = name
+            if name not in self.wiki_concepts_inv:
+                self.wiki_concepts_inv[name] = set()
+            self.wiki_concepts_inv[name].add(row["concept"])
+            Normalizer.add_name(name, self.wiki_synonyms, row["concept"])
             for name in row["names"].split("||"):
                 name = text_2_id(name)
-                Normalizer.add_name(name,self.names,row["concept"])
+                Normalizer.add_name(name, self.wiki_synonyms, row["concept"])
         logger.info("...Setting wiki names done!!")
 
-    def set_matches(self):
-        logger.info("Setting matches...")
-        names = list(self.names.keys())
-        for k,v in self.ref_synonyms.items():
-            if k in self.ref_names.keys() and len(self.ref_names[k])>0:
-                continue
-            names.append(k)
-            names.extend(list(v))
-        names = list(set(names))
-        logger.info("Number of names={}".format(len(names)))
-        matrix = get_tfidf_matrix(names)
-        matches = awesome_cossim_top(matrix, matrix.transpose(), 10, 0.7)
-        self.matches_df = get_matches_df(matches, names, top=100000)
-        self.matches_df = self.matches_df[self.matches_df['similarity'] < 0.9999999]  # Remove all exact matches
+    def find_exact_matches0(self, d1, d2, which_arg_is_wiki, matches):
+        for name in d1.keys():
+            if name in d2.keys():
+                for name1 in d1[name]:
+                    for name2 in d2[name]:
+                        if which_arg_is_wiki == 1 and name1 not in self.ref_names[name2]:
+                            if name2 not in matches:
+                                matches[name2] = set()
+                            matches[name2].add(self.wiki_concepts[name1])
 
-        logger.info("Number of matches={}".format(self.matches_df.shape[0]))
-        for i,row in self.matches_df.iterrows():
-            if row["left_side"] not in self.matches.keys():
-                self.matches[row["left_side"]] = set()
-            if row["right_side"] not in self.matches.keys():
-                self.matches[row["right_side"]] = set()
-            self.matches[row["left_side"]].add(row["right_side"])
-            self.matches[row["right_side"]].add(row["left_side"])
-        logger.info("...Setting matches done!")
+                        elif which_arg_is_wiki == 2 and name2 not in self.ref_names[name1]:
+                            if name1 not in matches:
+                                matches[name1] = set()
+                            matches[name1].add(self.wiki_concepts[name2])
+        return matches
 
     def find_exact_matches(self):
         logger.info("Starting exact matching normalization...")
-        count_found=0
-        count_not_found=0
-        i=0
-        for name in self.ref_names.keys():
-            if name in self.names.keys():
-                self.ref_names[name].update(self.names[name])
-                count_found += 1
-            else:
+        matches = self.find_exact_matches0(self.ref_synonyms, self.wiki_synonyms, 2, {})
+        matches = self.find_exact_matches0(self.wiki_synonyms, self.ref_synonyms, 1, matches)
+        count_found = 0
+        count_not_found = 0
+        for k, v in matches.items():
+            v = list(v)
+            indices = get_top_similarity_indices(k, v, threshold=0.7)
+            if indices == []:
+                continue
+            for i in indices:
+                for concept in self.wiki_concepts_inv[v[i]]:
+                    self.ref_names[k].add(concept)
+                    count_found += 1
+        for k, v in self.ref_names.items():
+            if len(v) == 0:
                 count_not_found += 1
-            if i%100==0:
-                logger.info("i={},found={},not_found={}".format(i,count_found, count_not_found))
-            i += 1
         logger.info("found={}, not_found={}".format(count_found, count_not_found))
         logger.info("...Exact matching normalization done!")
 
-    def find_fuzzy_matches(self):
-        logger.info("Starting fuzzy matching normalization...")
-        count_found = 0
-        count_not_found = 0
-        i = 0
-        self.set_matches()
-        for name in self.ref_names.keys():
-            if len(self.ref_names[name]) > 0:
-                continue
-            found=False
-            if name in self.matches.keys():
-                for item in self.matches[name]:
-                    if item in self.names.keys():
-                        self.ref_names[name].update(self.names[item])
-                        found=True
-            if found:
-                count_found +=1
-            else:
-                count_not_found += 1
-            if i % 100 == 0:
-                logger.info("i={},found={}, not_found={}".format(i, count_found,count_not_found))
-            i += 1
-        logger.info("...Fuzzing matching normalization done!")
-        logger.info("found={}, not_found={}".format(count_found, count_not_found))
+    def normalize(self):
 
-    def normalize(self,df_match=None):
-        if df_match is not None:
-            wikis = []
-            refs = []
-            for i, row in df_match.iterrows():
-                if len(row["wiki"]) > 0:
-                    wikis.append(row["wiki"])
-                    refs.append(row["ref"])
-            refs = list(set(refs))
-            wikis = list(set(wikis))
-            self.ref_synonyms = {}
-            self.names = {}
-            self.set_ref_names(negative_list=refs)
-            self.set_wiki_names(negative_list=wikis)
-            self.find_fuzzy_matches()
-            new_ref_names = {}
-            for i, row in df_match.iterrows():
-                if row["ref"] in self.ref_names and len(row["wiki"])>0:
-                    logger.info("#Error: {}, {}".format(row["ref"],row["wiki"]))
-                elif row["ref"] not in new_ref_names.keys():
-                    new_ref_names[row["ref"]] = set()
-                if len(row["wiki"])>0:
-                    new_ref_names[row["ref"]].add(row["wiki"])
-            for k,v in new_ref_names.items():
-                if k in self.ref_names:
-                    self.ref_names[k].update(v)
-                else:
-                    self.ref_names[k] = v
-        else:
-            self.set_wiki_names()
-            self.set_ref_names()
-            self.find_exact_matches()
-            wikis = flatten([list(value) for value in self.ref_names.values()])
-            refs = [ref for ref in self.ref_names.keys() if len(self.ref_names[ref]) > 0]
-            self.ref_synonyms = {}
-            self.names = {}
-            self.set_ref_names(negative_list=refs)
-            self.set_wiki_names(negative_list=wikis)
-            self.find_fuzzy_matches()
-
-        self.matches_df.to_csv(os.path.join(self.output_folder, "matches.csv"), index=False, sep="\t")
+        self.set_wiki_names()
+        self.set_ref_names()
+        self.find_exact_matches()
 
         with open(os.path.join(self.output_folder, "matching_athletes.csv"), "w") as f:
             wr = csv.writer(f, delimiter="\t")
@@ -173,30 +128,17 @@ class Normalizer:
                 wr.writerow([k, "||".join(v)])
 
 
-import csv
-
 if __name__ == "__main__":
-    description_msg = 'Normalizing athlete names to wikipedia uris in 2 stages: (1) with basic combinations and name matching, (2) with tf*idf similarity matrix for the remainders'
+    description_msg = 'Normalizing athlete names to wikipedia uris with basic combinations and name matching, '
     parser = argparse.ArgumentParser(description=description_msg)
     parser.add_argument('-r', '--ref', help='The athletes csv', required=True)
-    parser.add_argument('-m', '--match', help='The matching csv')
     parser.add_argument('-w', '--wiki', help='The wiki csv', required=True)
     parser.add_argument('-o', '--output', help='The output folder', required=True)
     args = vars(parser.parse_args())
-    df_ref = pd.read_csv(args["ref"],sep=",")
+    df_ref = pd.read_csv(args["ref"], sep=",")
     df_ref = df_ref.fillna("")
-    #df_ref = df_ref.sample(10)
-    df_wiki = pd.read_csv(args["wiki"],sep="\t")
+    df_wiki = pd.read_csv(args["wiki"], sep="\t")
     df_wiki = df_wiki.fillna("")
 
-    normalizer = Normalizer(df_ref,df_wiki, args["output"])
-
-    df_match = None
-    if args["match"] is not None:
-        df_match = pd.read_csv(args["match"],sep="\t")
-        df_match = df_match.fillna("")
-
-    normalizer.normalize(df_match=df_match)
-
-
-
+    normalizer = Normalizer(df_ref, df_wiki, args["output"])
+    normalizer.normalize()

@@ -1,7 +1,7 @@
 import itertools
 import re
 import unicodedata
-
+from collections import Counter
 
 def strip_accents(text):
     """
@@ -19,10 +19,16 @@ def strip_accents(text):
     return str(text)
 
 
+def text_to_vector(text):
+    WORD = re.compile(r"\w+")
+    words = WORD.findall(text)
+    return Counter(words)
+
 def text_2_id(text):
+    text = re.sub(r"\-"," ", text)
     text = re.sub(r"\([^\)]+\)", "", text)
     text = text.strip()
-    # text = strip_accents(text)
+    #text = strip_accents(text)
     text = re.sub(r"[^a-zA-Z ]+", "", text)  # we remove anything that's not a space or an ascii alphabetical characters
     return text.lower()
 
@@ -36,26 +42,3 @@ def get_combinations(items, sz):
     return results
 
 
-def ngrams(string, n=2):
-    string = re.sub(r'[,-./]', r'', string)
-    ngrams = zip(*[string[i:] for i in range(n)])
-    return [''.join(ngram) for ngram in ngrams]
-
-
-def flatten0(l,output):
-    for i in l:
-        if isinstance(i,list) and len(i)>0:
-            flatten0(i,output)
-        elif not isinstance(i,list):
-            output.append(i)
-
-def flatten(l):
-    output = []
-    flatten0(l,output)
-    return output
-
-
-if __name__ == "__main__":
-    print(ngrams("johan hjalmar john lindroth"))
-    print(ngrams("john lindroth"))
-    print(get_combinations(["johan", "hjalmar", "john", "lindroth"],2))

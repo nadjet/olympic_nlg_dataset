@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="d0c99138-caa8-4ca9-a2ff-6ace699942b9" name="Default Changelist" comment="" />
+    <list default="true" id="d0c99138-caa8-4ca9-a2ff-6ace699942b9" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/normalize.py" beforeDir="false" afterPath="$PROJECT_DIR$/normalize.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/similarity.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/similarity.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/utils.py" afterDir="false" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -13,8 +17,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/dbpedia_mining.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="189">
-              <caret line="95" column="10" selection-start-line="95" selection-start-column="10" selection-end-line="95" selection-end-column="10" />
+            <state relative-caret-position="191">
+              <caret line="60" column="27" selection-start-line="60" selection-start-column="27" selection-end-line="60" selection-end-column="27" />
               <folding>
                 <element signature="e#0#15#0" expanded="true" />
               </folding>
@@ -25,20 +29,22 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/normalize.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="163">
-              <caret line="39" column="28" lean-forward="true" selection-start-line="39" selection-start-column="28" selection-end-line="39" selection-end-column="28" />
+            <state relative-caret-position="275">
+              <caret line="124" column="33" selection-start-line="124" selection-start-column="33" selection-end-line="124" selection-end-column="33" />
               <folding>
-                <element signature="e#0#19#0" expanded="true" />
+                <element signature="e#0#15#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/venv/lib/python3.7/site-packages/pandas/core/generic.py">
+        <entry file="file://$PROJECT_DIR$/utils/log.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="216">
-              <caret line="5060" selection-start-line="5060" selection-end-line="5060" />
+            <state>
+              <folding>
+                <element signature="e#0#10#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -46,8 +52,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/utils/utils.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="138">
-              <caret line="31" column="41" selection-start-line="31" selection-start-column="41" selection-end-line="31" selection-end-column="41" />
+            <state relative-caret-position="504">
+              <caret line="42" selection-start-line="42" selection-end-line="42" />
               <folding>
                 <element signature="e#0#16#0" expanded="true" />
               </folding>
@@ -56,28 +62,22 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/utils/similarity.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-367">
-              <caret line="7" column="28" selection-start-line="7" selection-start-column="24" selection-end-line="7" selection-end-column="28" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/venv/lib/python3.7/site-packages/pandas/core/frame.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="166">
-              <caret line="551" selection-start-line="551" selection-end-line="551" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/utils/sparql_utils.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="690">
+            <state relative-caret-position="322">
               <caret line="50" column="43" selection-start-line="50" selection-start-column="43" selection-end-line="50" selection-end-column="43" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/utils/similarity.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="60">
+              <caret line="4" column="17" selection-start-line="4" selection-start-column="17" selection-end-line="4" selection-end-column="17" />
+              <folding>
+                <element signature="e#1#12#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -93,37 +93,40 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>.info</find>
-      <find>execute_query</find>
-      <find>logger.</find>
-      <find>10</find>
-      <find>rigal</find>
-      <find>Numb</find>
-      <find>Start</find>
-      <find>abdullayev</find>
-      <find>match_d</find>
-      <find>self.names</find>
-      <find>ref_wiki</find>
-      <find>si</find>
+      <find>normalize</find>
+      <find>get_sub</find>
+      <find>not_f</find>
+      <find>, 1</find>
+      <find>find_exact_matches</find>
+      <find>synony</find>
+      <find>ref_names</find>
+      <find>ref_synonyms</find>
+      <find>combin</find>
+      <find>wiki_na</find>
+      <find>negativ</find>
+      <find>set_ref_names</find>
       <find>get_matches_df</find>
-      <find>oleg</find>
-      <find>oleg r</find>
-      <find>names</find>
-      <find>ngra</find>
-      <find>Number of nam</find>
-      <find>flatten</find>
-      <find>flatt</find>
-      <find>neg</find>
-      <find>mitsugi sarudate</find>
-      <find>pavel janeek</find>
-      <find>dimitrov</find>
-      <find>found</find>
-      <find>print</find>
-      <find>HELL</find>
+      <find>fuzz</find>
+      <find>top_s</find>
+      <find>get_to</find>
+      <find>get_cos</find>
+      <find>get_top_simi</find>
       <find>add_name</find>
-      <find>ADD</find>
-      <find>update</find>
+      <find>top_simi</find>
+      <find>comb</find>
+      <find>wiki_names</find>
+      <find>top_</find>
+      <find>get_t</find>
+      <find>matrix</find>
+      <find>print</find>
+      <find>get_al</find>
+      <find>set_wiki_names</find>
+      <find>get_subnames</find>
+      <find>ngra</find>
     </findStrings>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
@@ -131,18 +134,24 @@
         <option value="$PROJECT_DIR$/utils/sparql_utils.py" />
         <option value="$PROJECT_DIR$/dbpedia_mining.py" />
         <option value="$PROJECT_DIR$/utils/string_utils.py" />
+        <option value="$PROJECT_DIR$/utils/malstm_siamese.py" />
+        <option value="$PROJECT_DIR$/fasttext_spell.py" />
+        <option value="$PROJECT_DIR$/bpe.py" />
+        <option value="$PROJECT_DIR$/bpe_test.py" />
+        <option value="$PROJECT_DIR$/spelling_fasttext.py" />
         <option value="$PROJECT_DIR$/utils/similarity.py" />
         <option value="$PROJECT_DIR$/utils/utils.py" />
         <option value="$PROJECT_DIR$/normalize.py" />
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="1440" />
-    <option name="y" value="27" />
-    <option name="width" value="1908" />
-    <option name="height" value="1052" />
+  <component name="ProjectFrameBounds">
+    <option name="x" value="1442" />
+    <option name="y" value="24" />
+    <option name="width" value="1920" />
+    <option name="height" value="1057" />
   </component>
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
     <navigator proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
@@ -168,6 +177,7 @@
     </panes>
   </component>
   <component name="PropertiesComponent">
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RunDashboard">
@@ -204,6 +214,27 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="fasttext_spell" type="PythonConfigurationType" factoryName="Python">
+      <module name="olympic_dataset4nlg" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="$PROJECT_DIR$/venv/bin/python" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="normalize" type="PythonConfigurationType" factoryName="Python">
       <module name="olympic_dataset4nlg" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -217,7 +248,49 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="normalize" />
-      <option name="PARAMETERS" value="-r $PROJECT_DIR$/../data/all_athlete_events.csv -w $PROJECT_DIR$/../output/sparql_medalists.csv -m $PROJECT_DIR$/../output/matching_athletes0.csv  -o $PROJECT_DIR$/../output" />
+      <option name="PARAMETERS" value="-r $PROJECT_DIR$/../data/all_athlete_events.csv  -w $PROJECT_DIR$/../output/sparql_medalists.csv -o $PROJECT_DIR$/../output" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="true" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="similarity" type="PythonConfigurationType" factoryName="Python">
+      <module name="olympic_dataset4nlg" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="$PROJECT_DIR$/venv/bin/python" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="utils.similarity" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="true" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="spelling_fasttext" type="PythonConfigurationType" factoryName="Python">
+      <module name="olympic_dataset4nlg" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="$PROJECT_DIR$/venv/bin/python" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="spelling_fasttext" />
+      <option name="PARAMETERS" value="$PROJECT_DIR$/../output/sparql_medalists.csv $PROJECT_DIR$/../data/all_athlete_events.csv $PROJECT_DIR$/../output/" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="true" />
@@ -247,9 +320,12 @@
       <method v="2" />
     </configuration>
     <list>
+      <item itemvalue="Python.similarity" />
       <item itemvalue="Python.dbpedia_mining" />
       <item itemvalue="Python.normalize" />
       <item itemvalue="Python.string_utils" />
+      <item itemvalue="Python.spelling_fasttext" />
+      <item itemvalue="Python.fasttext_spell" />
     </list>
   </component>
   <component name="SvnConfiguration">
@@ -266,7 +342,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="1440" y="23" width="1920" height="1057" extended-state="6" />
+    <frame x="1442" y="24" width="1920" height="1057" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info id="Favorites" side_tool="true" />
@@ -278,8 +354,8 @@
       <window_info anchor="bottom" id="Event Log" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.3015544" />
-      <window_info anchor="bottom" id="Debug" order="3" weight="0.52312773" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.27564767" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.32953367" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
@@ -289,10 +365,27 @@
     </layout>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/utils/sparql_utils.py">
+    <entry file="file://$PROJECT_DIR$/venv/lib/python3.7/site-packages/pandas/core/generic.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="690">
-          <caret line="50" column="43" selection-start-line="50" selection-start-column="43" selection-end-line="50" selection-end-column="43" />
+        <state relative-caret-position="216">
+          <caret line="5060" selection-start-line="5060" selection-end-line="5060" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/utils/malstm_siamese.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="186">
+          <caret line="74" column="26" lean-forward="true" selection-start-line="74" selection-start-column="26" selection-end-line="74" selection-end-column="26" />
+          <folding>
+            <element signature="e#32#86#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/venv/lib/python3.7/site-packages/pandas/core/series.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="207">
+          <caret line="868" selection-start-line="868" selection-end-line="868" />
         </state>
       </provider>
     </entry>
@@ -303,46 +396,78 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/fasttext_spell.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="120">
+          <caret line="8" column="9" selection-start-line="8" selection-start-column="9" selection-end-line="8" selection-end-column="9" />
+          <folding>
+            <element signature="e#0#43#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/spelling_fasttext.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="477">
+          <caret line="44" column="53" selection-start-line="44" selection-start-column="53" selection-end-line="44" selection-end-column="53" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/dbpedia_mining.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="189">
-          <caret line="95" column="10" selection-start-line="95" selection-start-column="10" selection-end-line="95" selection-end-column="10" />
+        <state relative-caret-position="191">
+          <caret line="60" column="27" selection-start-line="60" selection-start-column="27" selection-end-line="60" selection-end-column="27" />
           <folding>
             <element signature="e#0#15#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/utils/similarity.py">
+    <entry file="file://$PROJECT_DIR$/utils/log.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-367">
-          <caret line="7" column="28" selection-start-line="7" selection-start-column="24" selection-end-line="7" selection-end-column="28" />
+        <state>
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/utils/utils.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="138">
-          <caret line="31" column="41" selection-start-line="31" selection-start-column="41" selection-end-line="31" selection-end-column="41" />
+        <state relative-caret-position="504">
+          <caret line="42" selection-start-line="42" selection-end-line="42" />
           <folding>
             <element signature="e#0#16#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/venv/lib/python3.7/site-packages/pandas/core/generic.py">
+    <entry file="file://$PROJECT_DIR$/utils/sparql_utils.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="216">
-          <caret line="5060" selection-start-line="5060" selection-end-line="5060" />
+        <state relative-caret-position="322">
+          <caret line="50" column="43" selection-start-line="50" selection-start-column="43" selection-end-line="50" selection-end-column="43" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/utils/similarity.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="60">
+          <caret line="4" column="17" selection-start-line="4" selection-start-column="17" selection-end-line="4" selection-end-column="17" />
+          <folding>
+            <element signature="e#1#12#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/normalize.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="163">
-          <caret line="39" column="28" lean-forward="true" selection-start-line="39" selection-start-column="28" selection-end-line="39" selection-end-column="28" />
+        <state relative-caret-position="275">
+          <caret line="124" column="33" selection-start-line="124" selection-start-column="33" selection-end-line="124" selection-end-column="33" />
           <folding>
-            <element signature="e#0#19#0" expanded="true" />
+            <element signature="e#0#15#0" expanded="true" />
           </folding>
         </state>
       </provider>
