@@ -9,6 +9,10 @@ from utils.similarity import get_top_similarity_indices
 from utils.utils import text_2_id, get_combinations
 
 
+class WikiConcept:
+    def __init__(self,uri):
+        self.uri = uri
+
 class Normalizer:
     def __init__(self, ref_df, wiki_df, output_folder):
         self.ref_df = ref_df
@@ -121,11 +125,19 @@ class Normalizer:
         self.set_ref_names()
         self.find_exact_matches()
 
+        count_multiple = 0
+        count_one = 0
         with open(os.path.join(self.output_folder, "matching_athletes.csv"), "w") as f:
             wr = csv.writer(f, delimiter="\t")
             wr.writerow(["ref", "wiki"])
             for k, v in self.ref_names.items():
+                if len(v)>1:
+                    count_multiple +=1
+                elif len(v)==1:
+                    count_one +=1
                 wr.writerow([k, "||".join(v)])
+        logger.info("Number of matched athletes={}, of which with unique uri={}, "
+                    "of which with more than one uri={}".format((count_one+count_multiple), count_one, count_multiple))
 
 
 if __name__ == "__main__":
