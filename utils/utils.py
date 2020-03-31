@@ -24,6 +24,7 @@ def text_to_vector(text):
     words = WORD.findall(text)
     return Counter(words)
 
+
 def text_2_id(text):
     text = re.sub(r"\-"," ", text)
     text = re.sub(r"\([^\)]+\)", "", text)
@@ -41,4 +42,21 @@ def get_combinations(items, sz):
                 results.append(i)
     return results
 
+
+def ngrams(string, n=2):
+    string = re.sub(r'[,-./]', r'', string)
+    ngrams = zip(*[string[i:] for i in range(n)])
+    return [''.join(ngram) for ngram in ngrams]
+
+def flatten0(l,output):
+    for i in l:
+        if isinstance(i,list) and len(i)>0:
+            flatten0(i,output)
+        elif not isinstance(i,list):
+            output.append(i)
+
+def flatten(l):
+    output = []
+    flatten0(l,output)
+    return output
 

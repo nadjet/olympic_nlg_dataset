@@ -102,7 +102,7 @@ class DBPediaMining:
 import pandas as pd
 
 if __name__ == "__main__":
-    description_msg = 'Get all olympic medalists'
+    description_msg = 'Get all olympic athletes'
     parser = argparse.ArgumentParser(description=description_msg)
     parser.add_argument('-o', '--output', help='The output file', required=True)
     args = vars(parser.parse_args())
