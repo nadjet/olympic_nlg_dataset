@@ -185,19 +185,20 @@ class Normalizer:
     def normalize(self, output_file="matching_athletes.csv"):
         self.find_exact_matches()
         self.find_fuzzy_matches()
+        references = self.references.get_id_dict()
         with open(os.path.join(self.output_folder, output_file), "w") as f:
             wr = csv.writer(f, delimiter="\t")
             wr.writerow(["ref","uri","ref_id","uri_id","similarity","#matching_concepts","#matching_refs"])
-            for reference_id in self.references.get_collection():
+            for reference_id in references:
                 if reference_id in self.reference_matches.keys():
                     if len(self.reference_matches[reference_id])==0:
-                        wr.writerow([reference_id,"",self.references[reference_id].get_label()])
+                        wr.writerow([reference_id,"",references[reference_id].get_label()])
                     else:
                         for match in self.reference_matches[reference_id]:
                             uri_id = match[0]
                             threshold = match[1]
-                            reference_label = self.references[reference_id].get_label()
-                            uri_label = self.wiki_concepts.get_uri_dict()[uri_id]
+                            reference_label = references[reference_id].get_label()
+                            uri_label = self.wiki_concepts.get_uri_dict()[uri_id].get_main_label()
                             wr.writerow([reference_label,uri_label,reference_id, uri_id, threshold,
                                          len(self.reference_matches[reference_id]), len(self.wiki_matches[match[0]])])
 
