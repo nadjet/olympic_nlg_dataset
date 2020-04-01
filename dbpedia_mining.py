@@ -57,6 +57,20 @@ class DBPediaMining:
     query_all = {"query": query, "variables": ["concept", "label", "abstract", "gender", "birth_date", "death_date",
                                                "names", "birth_place", "death_place", "nationality"]}
 
+    query = PREFIX_DBO + PREFIX_DBC + PREFIX_PROP + PREFIX_DCT + PREFIX_FOAF +\
+            " SELECT DISTINCT " \
+            "?concept " \
+            "(COALESCE(?label0, '') AS ?label) " \
+            " WHERE {" \
+            "?concept dct:subject <+subject+> . " \
+            "?concept rdf:type dbo:Person . " \
+            "?concept rdfs:label ?label0 . " \
+            "FILTER (lang(?label0) = 'en') " \
+            "}"
+
+    query_concept_label = {"query": query, "variables": ["concept", "label"]}
+
+
     def __init__(self):
         self.medalists = {}
 
@@ -107,7 +121,7 @@ if __name__ == "__main__":
     parser.add_argument('-o', '--output', help='The output file', required=True)
     args = vars(parser.parse_args())
     dbpedia_mining = DBPediaMining()
-    dbpedia_mining.set_info(DBPediaMining.query_all,end_point="http://localhost:8890/sparql")
+    dbpedia_mining.set_info(DBPediaMining.query_concept_label, end_point="http://live.dbpedia.org/sparql") #end_point="http://localhost:8890/sparql")
     rows = dbpedia_mining.medalists.values()
     df = pd.DataFrame(rows)
     df.to_csv(args["output"], index=False, sep="\t", encoding='utf-8')

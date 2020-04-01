@@ -1,8 +1,9 @@
 import argparse
 import csv
 import os
-import pandas as pd
 from collections import namedtuple
+
+import pandas as pd
 
 from utils.log import logger
 from utils.similarity import get_tfidf_matrix, awesome_cossim_top, get_matches_df
@@ -28,8 +29,8 @@ class WikiConcept:
 class WikiConceptCollection:
     def __init__(self, df):
         self.df = df
-        self.id_dict = {}  # key is identifier, value is wiki concept
-        self.uri_dict = {} # key is uri, value is wiki concept
+        self.id_dict = {}  # key is identifier, value is set of wiki concept
+        self.uri_dict = {}  # key is uri, value is set of wiki concept
 
     def set_dicts(self):
         logger.info("Loading wiki concepts...")
@@ -38,8 +39,12 @@ class WikiConceptCollection:
             name = row["label"]
             identifier = text_2_id(name)
             wiki_concept = WikiConcept(concept, identifier, name)
-            self.id_dict[identifier] = wiki_concept
-            self.uri_dict[concept] = wiki_concept
+            if identifier not in self.id_dict:
+                self.id_dict[identifier] = set()
+            if concept not in self.uri_dict:
+                self.uri_dict[concept] = set()
+            self.id_dict[identifier].add(wiki_concept)
+            self.uri_dict[concept].add(wiki_concept)
         logger.info("...Loading {} wiki concepts done!".format(len(self.id_dict)))
 
     def get_id_dict(self):
@@ -64,18 +69,33 @@ class Reference:
 class ReferenceCollection:
     def __init__(self, df):
         self.df = df
-        self.id_dict = {}  # key is id, value is reference
+        self.id_dict = {}  # key is id, value is set of references
 
     def set_id_dict(self):
         logger.info("Loading references...")
         for label in set(self.df["Name"].unique()):
             identifier = text_2_id(label)
-            reference = Reference(identifier,label)
-            self.id_dict[identifier] = reference
+            reference = Reference(identifier, label)
+            if identifier not in self.id_dict:
+                self.id_dict[identifier] = set()
+            self.id_dict[identifier].add(reference)
         logger.info("...Loading {} references done!".format(len(self.id_dict)))
 
     def get_id_dict(self):
         return self.id_dict
+
+
+BasicMatch = namedtuple('BasicMatch', ['match', 'type'])
+
+
+class Match(BasicMatch):
+    def __hash__(self):
+        return hash(self.match)
+
+    def __eq__(self, other):
+        if not isinstance(other, Match):
+            return False
+        return other.match == self.match
 
 
 class Normalizer:
@@ -85,7 +105,6 @@ class Normalizer:
         self.wiki_concepts = WikiConceptCollection(wiki_df)
         self.wiki_concepts.set_dicts()
         self.output_folder = output_folder
-        self.Match = namedtuple('Match',['match','type'])
 
         # key is reference id , value is set of wiki matches
         self.reference_matches = {reference: set() for reference in self.references.get_id_dict()}
@@ -116,37 +135,63 @@ class Normalizer:
         found_references, not_found_references = Normalizer.get_keys(self.reference_matches)
         found_wikis, not_found_wikis = Normalizer.get_keys(self.wiki_matches)
         logger.info("Number of references={}, found={}, left without matching={}".
-                    format(len(self.references.get_id_dict()),len(found_references), len(not_found_references)))
+                    format(len(self.references.get_id_dict()), len(found_references), len(not_found_references)))
         logger.info("Number of wiki concepts={}, found={}, left without matching={}".
-                    format(len(self.wiki_concepts.get_id_dict()),len(found_wikis), len(not_found_references)))
+                    format(len(self.wiki_concepts.get_id_dict()), len(found_wikis), len(not_found_references)))
 
-    def add_match(self,reference,uri,match_type):
-        self.reference_matches[reference].add(self.Match(uri,match_type))
-        self.wiki_matches[uri].add(self.Match(reference,match_type))
+    def add_match0(self, reference, uri, similarity):
+        self.reference_matches[reference].add(Match(uri, similarity))
+        self.wiki_matches[uri].add(Match(reference, similarity))
+
+    def add_match(self, uri_id, reference_id, similarity):
+        wiki_id_dict = self.wiki_concepts.get_id_dict()
+        found = 0
+        for wiki_concept in wiki_id_dict[uri_id]:
+            uri = wiki_concept.get_uri()
+            uri_match = Match(uri, similarity)
+            if uri_match not in self.reference_matches[reference_id]:
+                self.add_match0(reference_id, uri, similarity)
+                found += 1
+        return found
 
     @staticmethod
     def get_matches_df(names, threshold):
-        logger.info("Total number of names for matrix ={}, first 10={}".format(len(names),names[:10]))
+        logger.info("Total number of names for matrix ={}, first 10={}".format(len(names), names[:10]))
         matrix = get_tfidf_matrix(names)
         logger.info("Computing matches...")
-        matches = awesome_cossim_top(matrix, matrix.transpose(), 2, threshold)  # 2 because one is the similarity of the element with itself
+        matches = awesome_cossim_top(matrix, matrix.transpose(), 2,
+                                     threshold)  # 2 because one is the similarity of the element with itself
         logger.info("...Computing matches done!")
         matches_df = get_matches_df(matches, names, top=-1)
         logger.info("Before removing full similarity: {}".format(matches_df.shape))
-        matches_df = matches_df[matches_df['similarity'] < 1.] #we remove identity matches (element matching itself)
+        matches_df = matches_df[matches_df['similarity'] < 0.999999999]  # we remove identity matches (element matching itself), we use 0.99 instead of 1 because of floating point precision
         logger.info("After removing full similarity: {}".format(matches_df.shape))
         return matches_df
 
-    def find_fuzzy_matches0(self, threshold=0.7):
-        wiki_id_dict = self.wiki_concepts.get_id_dict()
-        wiki_uri_dict = self.wiki_concepts.get_uri_dict()
-        references = set([k for k, v in self.reference_matches.items() if len(v) == 0])
-        wikis = set([wiki_uri_dict[k].get_identifier() for k, v in self.wiki_matches.items() if len(v) == 0])
+    @staticmethod
+    def get_unmatched_keys(d):
+        items = set()
+        for k, v in d.items():
+            if len(v) == 0:
+                items.add(k)
+        return items
 
-        if len(references) == 0 or len(wikis) == 0:
+    def get_unmatched(self):
+        reference_ids = Normalizer.get_unmatched_keys(self.reference_matches)
+        wiki_uri_dict = self.wiki_concepts.get_uri_dict()
+        wiki_ids = set()
+        for uri in Normalizer.get_unmatched_keys(self.wiki_matches):
+            for wiki in wiki_uri_dict[uri]:
+                wiki_ids.add(wiki.get_identifier())
+        return reference_ids, wiki_ids
+
+    def find_fuzzy_matches0(self, threshold=0.7):
+        reference_ids, wiki_ids = self.get_unmatched()
+        if len(reference_ids) == 0 or len(wiki_ids) == 0:
             logger.info("No values to do fuzzy match with")
             return
-        names = list(set(list(references) + list(wikis)))
+
+        names = list(set(list(reference_ids) + list(wiki_ids)))
         matches_df = Normalizer.get_matches_df(names, threshold)
 
         num_fuzzy = 0
@@ -156,16 +201,10 @@ class Normalizer:
             if counter % 20000 == 0:
                 logger.info(counter)
             counter += 1
-            if left_side in references and right_side in wikis:
-                uri = wiki_id_dict[right_side].get_uri()
-                if uri not in self.reference_matches[left_side]:
-                    self.add_match(left_side, uri, similarity)
-                    num_fuzzy += 1
-            if right_side in references and left_side in wikis:
-                uri = wiki_id_dict[left_side].get_uri()
-                if uri not in self.reference_matches[right_side]:
-                    self.add_match(right_side, uri, similarity)
-                    num_fuzzy += 1
+            if left_side in reference_ids and right_side in wiki_ids:
+                num_fuzzy += self.add_match(right_side, left_side, similarity)
+            if right_side in reference_ids and left_side in wiki_ids:
+                num_fuzzy += self.add_match(left_side, right_side, similarity)
         logger.info("...{} fuzzy matches found!".format(num_fuzzy))
 
     def find_exact_matches(self):
@@ -173,13 +212,13 @@ class Normalizer:
         found = 0
         logger.info("Finding exact matches...")
         references = self.references.get_id_dict()
-        for identifier, concept in self.wiki_concepts.get_id_dict().items():
+        wikis = self.wiki_concepts.get_id_dict()
+        for identifier in wikis.keys():
             if counter % 100 == 0:
                 logger.info(counter)
             counter += 1
-            if identifier in references:
-                found += 1
-                self.add_match(identifier,concept.get_uri(),1.)
+            if identifier in references.keys():
+                found += self.add_match(identifier, identifier, 1.)
         logger.info("...{} exact matches found!".format(found))
 
     def normalize(self, output_file="matching_athletes.csv"):
@@ -188,19 +227,22 @@ class Normalizer:
         references = self.references.get_id_dict()
         with open(os.path.join(self.output_folder, output_file), "w") as f:
             wr = csv.writer(f, delimiter="\t")
-            wr.writerow(["ref","uri","ref_id","uri_id","similarity","#matching_concepts","#matching_refs"])
+            wr.writerow(["ref", "uri", "ref_id", "uri_id", "similarity", "#matching_concepts", "#matching_refs"])
             for reference_id in references:
                 if reference_id in self.reference_matches.keys():
-                    if len(self.reference_matches[reference_id])==0:
-                        wr.writerow([reference_id,"",references[reference_id].get_label()])
+                    if len(self.reference_matches[reference_id]) == 0:
+                        for reference in references[reference_id]:
+                            wr.writerow([reference_id, "", reference.get_label()])
                     else:
                         for match in self.reference_matches[reference_id]:
-                            uri_id = match[0]
+                            uri = match[0]
                             threshold = match[1]
-                            reference_label = references[reference_id].get_label()
-                            uri_label = self.wiki_concepts.get_uri_dict()[uri_id].get_main_label()
-                            wr.writerow([reference_label,uri_label,reference_id, uri_id, threshold,
-                                         len(self.reference_matches[reference_id]), len(self.wiki_matches[match[0]])])
+                            for wiki_concept in self.wiki_concepts.get_uri_dict()[uri]:
+                                uri_id = wiki_concept.get_identifier()
+                                for reference in references[reference_id]:
+                                    reference = reference.get_label()
+                                    wr.writerow([reference, uri, reference_id, uri_id, threshold,
+                                                 len(self.reference_matches[reference_id]), len(self.wiki_matches[match[0]])])
 
 
 if __name__ == "__main__":
@@ -213,7 +255,7 @@ if __name__ == "__main__":
     df_ref = pd.read_csv(args["ref"], sep=",")
     df_ref = df_ref.fillna("")
     df_wiki = pd.read_csv(args["wiki"], sep="\t")
-    df_wiki["concept"] = df_wiki["concept"].str.replace("http://dbpedia.org/resource/","")
+    df_wiki["concept"] = df_wiki["concept"].str.replace("http://dbpedia.org/resource/", "")
     df_wiki = df_wiki.fillna("")
 
     normalizer = Normalizer(df_ref, df_wiki, args["output"])

@@ -8,7 +8,9 @@ The source of the data is DBPedia, Wikipedia and a dataset of scraped Olympic at
 
 ###DBPedia Dump
 
-From the 2016 DBPedia datastore we obtain the uris of +121k olympic athletes with additional personal information: abstract, date and place of birth/death, nationality, gender and additional names. 
+We obtain +140k olympic athletes URIs from both a local 2016 DBPedia triplestore and the live dbpedia.
+
+From the 2016 DBPedia triplestore we obtain additional information for +121k olympic athletes, namely the abstract, date and place of birth/death, nationality, gender and additional names. 
 
 ###Olympic Athletes Dataset
 
@@ -24,8 +26,7 @@ Wikipedia articles are downloaded from the wikipedia export page [here](https://
 
 The dataset is obtained by following these steps:
 
-1. Query the sparql end point for Athletes uris and information (= all pages whose subject are descendants of the "Olympic competitors" category).
-2. Normalize the names in the olympic athletes csv to uris.
+1. Normalize the names in the olympic athletes csv to DBPedia English `rdfs:label` values associated with retrieved URIs.
 3. Extract relevant text from abstracts and/or articles summaries.
 
 ### Name normalization
